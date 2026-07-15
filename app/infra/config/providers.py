@@ -48,6 +48,8 @@ infra_config = InfraConfig()
 if __name__ == "__main__":
     print(infra_config.lm_config.api_key)
     print(infra_config.settings_config.import_app_name)
+    print(infra_config.mineru_config.base_url)
+    print(infra_config.mineru_config.api_key)
 
 
 #  python -m app.shared.runtime.load_prompt

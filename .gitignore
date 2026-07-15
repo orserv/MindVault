@@ -1,5 +1,4 @@
 # Created by gitignore.io
-a.py
 environment.yml
 requirements.txt
 .vscode/
@@ -7,6 +6,8 @@ shopkeeper_brain.egg-info/
 logs/
 doc/
 tests/
+note/
+output/
 
 
 

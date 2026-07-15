@@ -32,7 +32,9 @@ LOG_FILE_LEVEL = os.getenv("LOG_FILE_LEVEL", "INFO").upper()
 LOG_FILE_RETENTION = os.getenv("LOG_FILE_RETENTION", "7 days")
 
 # -------------------------- 第三步：定义日志路径（自动推导项目根） --------------------------
-PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent.parent
+# PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent.parent
+# == parents: 获取当前文件所在目录的上级目录[runtime,shared,app,项目名称]
+PROJECT_ROOT = Path(__file__).resolve().parents[3]
 LOG_DIR = PROJECT_ROOT / "logs"
 LOG_FILE_NAME = "app_{time:YYYYMMDD}.log"
 LOG_FILE_PATH = LOG_DIR / LOG_FILE_NAME

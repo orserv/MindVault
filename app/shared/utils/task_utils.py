@@ -65,6 +65,7 @@ def _ensure_task(task_id: str) -> None:
 
 def _to_cn(node_name: str) -> str:
     """将节点名转换为中文展示名；若无映射则返回原名。"""
+    # 字典.get(键, 默认值) 获取字典中键对应的值，如果键不在字典中，则返回默认值。
     return _NODE_NAME_TO_CN.get(node_name, node_name)
 
 
