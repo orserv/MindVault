@@ -10,6 +10,9 @@ from app.shared.runtime.logger import logger
 _DEFAULT_LLM_MODEL = "qwen3-32b"
 _DEFAULT_TEMPERATURE = 0.1
 _llm_client_cache: dict[tuple[str, bool], ChatOpenAI] = {}
+# qwen-plus  false   -> ChatOpenAI -> (qwen-plus,false) = ChatOpenAI [千问 不需要强调json]
+# qwen-plus  true    -> ChatOpenAI -> (qwen-plus,true) = ChatOpenAI [千问 强调json的数据]
+# qwen-plus  true    -> ChatOpenAI -> (qwen-plus,true) ->  _llm_client_cache -> ChatOpenAI
 
 
 def get_llm_client(model: str | None = None, json_mode: bool = False) -> ChatOpenAI:
@@ -31,7 +34,8 @@ def get_llm_client(model: str | None = None, json_mode: bool = False) -> ChatOpe
 
     # 2. 缓存命中：直接返回已初始化的实例，避免重复创建
     if cache_key in _llm_client_cache:
-        logger.debug(f"[LLM客户端] 缓存命中，直接返回实例：模型={target_model}，JSON模式={json_mode}")
+        logger.debug(
+            f"[LLM客户端] 缓存命中，直接返回实例：模型={target_model}，JSON模式={json_mode}")
         return _llm_client_cache[cache_key]
 
     # 3. 核心配置校验：拦截缺失的API关键配置，提前抛出明确异常
@@ -62,11 +66,11 @@ def get_llm_client(model: str | None = None, json_mode: bool = False) -> ChatOpe
             model_kwargs=model_kwargs,  # OpenAI通用参数
         )
     except LangChainException as e:
-        raise Exception(f"[LLM客户端] 模型【{target_model}】初始化失败（LangChain层）：{str(e)}") from e
+        raise Exception(
+            f"[LLM客户端] 模型【{target_model}】初始化失败（LangChain层）：{str(e)}") from e
 
     # 6. 新实例存入全局缓存，供后续调用复用
     _llm_client_cache[cache_key] = llm_client
     logger.info(f"[LLM客户端] 实例初始化成功并缓存：模型={target_model}，JSON模式={json_mode}")
 
     return llm_client
-

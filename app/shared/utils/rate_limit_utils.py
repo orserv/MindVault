@@ -28,9 +28,11 @@ def apply_api_rate_limit(
     # 2. 窗口内请求数达上限，计算并阻塞等待剩余时间
     if len(_GLOBAL_REQUEST_TIMES) >= max_requests:
         # 计算需要等待的时长（窗口总时长 - 最早请求已存在的时长）
-        sleep_duration = window_seconds - (current_time - _GLOBAL_REQUEST_TIMES[0])
+        sleep_duration = window_seconds - \
+            (current_time - _GLOBAL_REQUEST_TIMES[0])
         if sleep_duration > 0:
-            logger.debug(f"触发API速率限制，窗口{window_seconds}秒内最多{max_requests}次，需等待：{sleep_duration:.2f} 秒")
+            logger.debug(
+                f"触发API速率限制，窗口{window_seconds}秒内最多{max_requests}次，需等待：{sleep_duration:.2f} 秒")
             time.sleep(sleep_duration)
             # 等待后更新当前时间，重新清理过期请求（避免等待期间有请求过期）
             current_time = time.time()
@@ -38,4 +40,5 @@ def apply_api_rate_limit(
                 _GLOBAL_REQUEST_TIMES.popleft()
     # 3. 记录当前请求时间戳，加入滑动窗口队列
     _GLOBAL_REQUEST_TIMES.append(current_time)
-    logger.debug(f"API请求时间戳已记录，当前{window_seconds}秒窗口内请求数：{len(_GLOBAL_REQUEST_TIMES)}")
+    logger.debug(
+        f"API请求时间戳已记录，当前{window_seconds}秒窗口内请求数：{len(_GLOBAL_REQUEST_TIMES)}")
