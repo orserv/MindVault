@@ -14,3 +14,39 @@ def node_document_split(state: ImportGraphState) -> ImportGraphState:
     state = split_document(state)
     add_done_task(state["task_id"], "node_document_split")
     return state
+
+
+if __name__ == '__main__':
+    import os
+    from app.shared.runtime.logger import logger
+    from app.shared.utils.path_util import PROJECT_ROOT
+    # from app.process.import_.agent.nodes.node_md_img import node_md_img
+    # from pathlib import Path
+
+    logger.info("测试split")
+    logger.info(f"本地测试 - 项目根目录：{PROJECT_ROOT}")
+
+    test_md_name = os.path.join(r"output\hak180产品安全手册", "hak180产品安全手册.md")
+    test_md_path: str = os.path.join(PROJECT_ROOT, test_md_name)
+    # test_md_path_obj: Path = Path(test_md_path)
+
+    if not os.path.exists(test_md_path):
+        logger.error(f"本地测试 - 测试文件不存在：{test_md_path}")
+        logger.info("请检查文件路径，或手动将测试MD文件放入项目根目录的output目录下")
+    else:
+
+        # 3. 读取md_content
+        # md_content = test_md_path.read_text(encoding="utf-8")
+        test_state = {
+            "md_path": test_md_path,
+            "task_id": "test_task_123456",
+            # "md_content": md_content,
+            "md_content": "",
+            "file_title": "hak180产品安全手册",
+            "local_dir": os.path.join(PROJECT_ROOT, "output"),
+        }
+        # result_state = node_md_img(test_state)
+        # final_state = node_document_split(result_state)
+        final_state = node_document_split(test_state)
+        final_chunks = final_state.get("chunks", [])
+        logger.info(f"测试成功：最终生成{len(final_chunks)}个有效Chunk")
