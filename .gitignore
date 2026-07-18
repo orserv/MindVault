@@ -1,15 +1,11 @@
 # Created by gitignore.io
-environment.yml
-requirements.txt
 .vscode/
 .venv/
-shopkeeper_brain.egg-info/
 logs/
 doc/
 tests/
 note/
 output/
-pyvenv.cfg
 .python-version
 
 
