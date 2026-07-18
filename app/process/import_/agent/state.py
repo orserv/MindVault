@@ -28,7 +28,7 @@ class ImportGraphState(TypedDict):
     md_content: str  # Markdown 文档内容
     chunks: list  # 文档切片列表
     # ==================== 数据库相关 ====================
-    embedding_content: list  # 带有向量的切块
+    embeddings_content: list  # 带有向量的切块
 
 
 # 准备一个state对象
