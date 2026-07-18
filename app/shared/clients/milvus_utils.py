@@ -25,7 +25,8 @@ def get_milvus_client() -> MilvusClient | None:
                 logger.error("Milvus客户端连接失败：缺少MILVUS_URL环境变量配置")
                 return None
             # 初始化Milvus客户端
-            _milvus_client = MilvusClient(uri=milvus_uri)
+            _milvus_client = MilvusClient(
+                uri=milvus_uri, token=milvus_config.token if milvus_config.token else None)
             logger.info("Milvus客户端连接成功")
         return _milvus_client
     except Exception as e:
@@ -58,7 +59,7 @@ def create_hybrid_search_requests(dense_vector, sparse_vector, dense_params=None
         data=[dense_vector],
         anns_field="dense_vector",
         param=dense_params,
-        expr=expr, # 混合搜索的过滤条件   # 单列搜索 过滤条件 filter =
+        expr=expr,  # 混合搜索的过滤条件   # 单列搜索 过滤条件 filter =
         limit=limit
     )
 
@@ -92,7 +93,8 @@ def hybrid_search(client, collection_name, reqs, ranker_weights=(0.5, 0.5), norm
     try:
         # 初始化加权排名器：按权重融合稠密/稀疏向量的搜索结果
         # norm_score=True：先将两个向量评分归一化到0~1区间，再加权计算
-        rerank = WeightedRanker(ranker_weights[0], ranker_weights[1], norm_score=norm_score)
+        rerank = WeightedRanker(
+            ranker_weights[0], ranker_weights[1], norm_score=norm_score)
 
         # 默认返回字段：文档标识字段
         if output_fields is None:
@@ -111,5 +113,22 @@ def hybrid_search(client, collection_name, reqs, ranker_weights=(0.5, 0.5), norm
         logger.info(f"Milvus混合搜索完成，集合[{collection_name}]共检索到{len(res[0])}条结果")
         return res
     except Exception as e:
-        logger.error(f"Milvus混合搜索执行失败，集合[{collection_name}]：{str(e)}", exc_info=True)
+        logger.error(
+            f"Milvus混合搜索执行失败，集合[{collection_name}]：{str(e)}", exc_info=True)
         return None
+
+
+if __name__ == "__main__":
+    from pymilvus import MilvusClient
+    milvus_uri = milvus_config.milvus_url
+
+    # 测试Milvus客户端连接
+    client = MilvusClient(
+        uri=milvus_uri, token=milvus_config.token if milvus_config.token else None)
+
+    if client is None:
+        logger.error("Milvus客户端连接失败，请检查配置")
+    else:
+        logger.info("Milvus客户端连接成功")
+
+#  python -m app.shared.clients.milvus_utils

@@ -35,7 +35,7 @@ def get_bge_m3_ef() -> BGEM3EmbeddingFunction:
             "model_name": model_name,
             "device": device,
             "use_fp16": use_fp16,
-            "normalize_embeddings": True
+            "normalize_embeddings": True  # 模型原生对稠密+稀疏向量做L2归一化
         }
     )
 
@@ -107,7 +107,8 @@ def generate_embeddings(texts: list[str]) -> dict[str, list]:
         result = {
             # embeddings["dense"] = [[1稠密向量],[2稠密向量],[...]  -> 1024]
             # embeddings["sparse"] = [[1稀疏向量],[2稠密向量],[...]  -> 1024]
-            "dense": [emb.tolist() for emb in embeddings["dense"]],  # 嵌套列表，与输入文本一一对应
+            # 嵌套列表，与输入文本一一对应
+            "dense": [emb.tolist() for emb in embeddings["dense"]],
             "sparse": processed_sparse  # 字典列表，模型已做L2归一化
         }
         logger.success(f"{len(texts)}条文本向量生成完成，格式已适配工业级使用")
@@ -116,5 +117,3 @@ def generate_embeddings(texts: list[str]) -> dict[str, list]:
     except Exception as e:
         logger.error(f"文本向量生成失败：{str(e)}", exc_info=True)
         raise  # 不吞异常，向上传递让调用方做重试/降级处理
-
-
