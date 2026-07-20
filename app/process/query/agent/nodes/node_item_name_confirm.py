@@ -22,16 +22,27 @@ def node_item_name_confirm(state):
     # 识别完成后写入完成列表，方便前端展示当前节点已结束。
 
     # 模拟item_name确定和rewritten_query重写之后存储用户的问题的历史记录
-    history_repository.save_message(
-        session_id=state.get("session_id"),
-        role="user",   # 用户提问
-        text=state["original_query"],
-        rewritten_query="我说倪碟",
-        item_names=["你是沃尔"],
-        image_urls=["https://milvus.io/images/layout/milvus-logo.svg",
-                    "https://gitee.com/static/images/logo.svg?t=158106664"]
-    )
+    # history_repository.save_message(
+    #     session_id=state.get("session_id"),
+    #     role="user",   # 用户提问
+    #     text=state["original_query"],
+    #     rewritten_query="我说倪碟",
+    #     item_names=["你是沃尔"],
+    #     image_urls=["https://milvus.io/images/layout/milvus-logo.svg",
+    #                 "https://gitee.com/static/images/logo.svg?t=158106664"]
+    # )
 
     add_done_task(state["session_id"],
                   sys._getframe().f_code.co_name, state["is_stream"])
     return state
+
+
+if __name__ == "__main__":
+    mock_state = {
+        "session_id": "test_session_001",
+        "original_query": "HAK 180 烫金机怎么用？",
+        # "original_query": "它怎么用？",
+        "is_stream": False,
+    }
+    result_state = node_item_name_confirm(mock_state)
+    print(result_state)

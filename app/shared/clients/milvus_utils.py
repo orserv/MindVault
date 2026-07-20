@@ -47,9 +47,13 @@ def create_hybrid_search_requests(dense_vector, sparse_vector, dense_params=None
     :param limit: 单向量搜索返回结果数量，默认5
     :return: 搜索请求列表，包含[dense_req, sparse_req]
     """
+
+    # 单列检索  milvus_client . search (collection_name , ann_filed , data = [] , limit = , filter = "" )
+    # 混合检索  AnnSearchRequest(ann_filed,data,params=相识度搜索算法,limit=单路检索的数量,expr="过滤条件")
+
     # 稠密向量默认搜索参数：余弦相似度（COSINE），适配BGE-M3稠密向量并与建库参数保持一致
     if dense_params is None:
-        dense_params = {"metric_type": "IP"}
+        dense_params = {"metric_type": "COSINE"}
     # 稀疏向量默认搜索参数：内积（IP），适配BGE-M3稀疏向量
     if sparse_params is None:
         sparse_params = {"metric_type": "IP"}
@@ -93,8 +97,13 @@ def hybrid_search(client, collection_name, reqs, ranker_weights=(0.5, 0.5), norm
     try:
         # 初始化加权排名器：按权重融合稠密/稀疏向量的搜索结果
         # norm_score=True：先将两个向量评分归一化到0~1区间，再加权计算
+
+        # 创建加权排名器实例  * nums 0.5 0.5  0.5 0.5 取决于 reqs的数量 和 AnnsSearchRequest 的数量一一对应
+        # norm_score=True  分数区间为0到1之间， 稠密向量满分 1 分， 稀疏向量满分 0.75 分
         rerank = WeightedRanker(
             ranker_weights[0], ranker_weights[1], norm_score=norm_score)
+
+        # rrfranker
 
         # 默认返回字段：文档标识字段
         if output_fields is None:
