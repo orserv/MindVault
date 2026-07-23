@@ -3,6 +3,7 @@ from langchain_openai import ChatOpenAI
 from app.infra.config.providers import infra_config
 from app.shared.model.lm_utils import get_llm_client
 from app.shared.model.embedding_utils import get_bge_m3_ef, generate_embeddings
+from app.shared.model.reranker_utils import get_reranker_model
 
 
 class LLMProvider:
@@ -50,6 +51,10 @@ class LLMProvider:
     # 生成向量
     def generate_embeddings(self, texts: list[str]) -> dict[str, list]:
         return generate_embeddings(texts)
+
+    # 重排序模型
+    def reranker_model(self):
+        return get_reranker_model()
 
 
 # 创建全局唯一的 LLM 提供器实例，全项目通用，避免重复创建
