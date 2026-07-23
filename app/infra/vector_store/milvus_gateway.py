@@ -50,7 +50,7 @@ class MilvusGateway:
     #     Returns:
     #         int: 向量维度。
     #     """
-    #     return infra_config.milvus.embedding_dim
+    #     return infra_config.milvus_config.embedding_dim
 
     def create_requests(
         self,
@@ -106,7 +106,7 @@ class MilvusGateway:
             Any: Milvus 返回的原始检索结果。
         """
         return hybrid_search(
-            client=self.client(),
+            client=self.milvus_client,
             collection_name=collection_name,
             reqs=reqs,
             ranker_weights=ranker_weights,

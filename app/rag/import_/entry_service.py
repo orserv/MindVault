@@ -25,7 +25,7 @@ def resolve_input_file(state: ImportGraphState) -> ImportGraphState:
     if local_file_path.endswith(".md"):  # 判断是不是md
         state["is_md_read_enabled"] = True
         state["is_pdf_read_enabled"] = False
-        state["pdf_path"] = local_file_path
+        state["md_path"] = local_file_path
     # 4. 判断是不是pdf -> is_md_read_enabled = False pdf_path  is_pdf_read_enabled
     elif local_file_path.endswith(".pdf"):  # 判断是不是pdf
         state["is_pdf_read_enabled"] = True

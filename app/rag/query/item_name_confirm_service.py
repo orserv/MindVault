@@ -151,6 +151,7 @@ def search_by_item_names(item_names: list[str]) -> dict[str, list[dict]]:
             # {item_name:分,item_name:分...5个}
         # 5.循环完以后得结果最终返回即可
         final_result[item_name] = item_name_milvus_list
+    # {'item_name':[{"item_name": "bubulala", "score": 0.77}],'item_name':[{"item_name": "bulabula", "score": 0.78}]}
     return final_result
 
 
@@ -272,6 +273,8 @@ def confirm_item_name(state: QueryGraphState) -> QueryGraphState:
     # 3.调用模型识别item_names和rewritten_query -> json [item_names不一定准 大模型]
     result: dict = call_llm_item_name_and_rewritten(
         history_text, original_query)
+    # 初始化 list_dict 为空字典
+    list_dict: dict[str, list] = {"confirmed_list": [], "option_list": []}
     if len(result.get("item_names", [])) > 0:
         # 4. 进行向量数据库的搜索 llm - 分析 -> item_names -> milvus中进行查询 -> 打分
         # [1 -> 关联item_name,2 -> item_name,3 ...,4]

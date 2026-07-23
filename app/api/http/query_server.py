@@ -107,6 +107,8 @@ def invoke_query_graph(session_id: str, original_query: str, is_stream: bool) ->
         # 考虑: 可能异步执行 is_stream=True 也可能同步执行 False
         update_task_status(session_id, TASK_STATUS_FAILED,
                            push_queue=is_stream)
+        push_to_session(session_id, SSEEvent.ERROR, {
+                        "error": f"{session_id}业务失败！原因是{str(e)}"})
         logger.exception(f"执行查询流程报错,错误信息:{str(e)}")
 
 # 查询接口
