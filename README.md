@@ -83,7 +83,7 @@ python -m venv .venv
 .venv\Scripts\activate
 pip install -e .
 ```
-### 方式二：使用 pip
+### 方式三：使用 pip
  
 ```bash
 python -m venv .venv
