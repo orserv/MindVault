@@ -129,13 +129,13 @@ def search_by_item_names(item_names: list[str]) -> dict[str, list[dict]]:
             item_name_dense, item_name_sparse, limit=5*2)
         # 3.2 创建WeightReranker排序器
         # 3.3 进行混合检索
-        #  稠密 满分 1
-        #  稀疏 满分 0.6
-        #  0.5 0.5  = 0.75 - 0.8      0.73 -> 0.7   0.78  0.75
+        #  短文本(item_name)场景下，稠密向量(语义匹配)比稀疏向量(词项匹配)更可靠
+        #  稠密 满分 1  → 权重 0.7
+        #  稀疏 满分 0.6 → 权重 0.3
         results = milvus_gateway.hybrid_search(
             collection_name=milvus_gateway.item_name_collection_name,
             reqs=reqs,  # [1,2]
-            ranker_weights=(0.5, 0.5),
+            ranker_weights=(0.7, 0.3),
             norm_score=True,
             output_fields=['item_name']
         )
@@ -176,9 +176,9 @@ def select_item_names(milvus_result: dict[str, list[dict]]) -> dict[str, list]:
         # confirmed_list = [] -> 啥样的算确认  [ 稠密向量满分 1 * 0.5 + 稀疏向量满分 0.75 * 0.5 ] = 0.5 + 0.375 = 0.875 -> 0.8 + 确认
         # option_list = [] -> 算可选的 -> 0.6 - 0.8 -> 可选
         high_score_list = [
-            item for item in mivlus_result_list_dict if item.get("score", 0) >= 0.70]
+            item for item in mivlus_result_list_dict if item.get("score", 0) >= 0.60]
         midden_score_list = [
-            item for item in mivlus_result_list_dict if 0.6 <= item.get("score", 0) < 0.70]
+            item for item in mivlus_result_list_dict if 0.55 <= item.get("score", 0) < 0.60]
 
         if len(high_score_list) > 0:
             confirmed_list.append(high_score_list[0])
@@ -192,7 +192,8 @@ def select_item_names(milvus_result: dict[str, list[dict]]) -> dict[str, list]:
                 f"模型识别item_name:{item_name},没有对应向量数据库中确认的item_name,"
                 f"但是有可选的:{','.join([item.get('item_name') for item in midden_score_list[:2]])}")
             continue
-
+    # {增加}
+    logger.info(f"【得分】主体确认结果: 确认{len(confirmed_list)}个, 可选{len(option_list)}个")
     return {
         "confirmed_list": confirmed_list,
         "option_list": option_list
@@ -273,6 +274,7 @@ def confirm_item_name(state: QueryGraphState) -> QueryGraphState:
     # 3.调用模型识别item_names和rewritten_query -> json [item_names不一定准 大模型]
     result: dict = call_llm_item_name_and_rewritten(
         history_text, original_query)
+    logger.info(f"【调试】LLM 返回 result: {result}")
     # 初始化 list_dict 为空字典
     list_dict: dict[str, list] = {"confirmed_list": [], "option_list": []}
     if len(result.get("item_names", [])) > 0:
@@ -280,6 +282,7 @@ def confirm_item_name(state: QueryGraphState) -> QueryGraphState:
         # [1 -> 关联item_name,2 -> item_name,3 ...,4]
         milvus_result: dict[str, list[dict]] = search_by_item_names(
             result.get("item_names", []))
+        logger.info(f"【调试】Milvus 搜索结果: {milvus_result}")
         # 5. 根据打分确定两个列表 确认列表 可选列表
         # 确认列表
         # 可选列表

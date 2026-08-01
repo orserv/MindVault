@@ -75,6 +75,15 @@ def deal_milvus_list(milvus_list):
             "source": "milvus",  # 直接查询 或者假设性查询  milvus 网络检索 web
             "url": ""
         })
+    # {增加}
+    if hyde_embedding_chunks:
+        scores = [s['score'] for s in hyde_embedding_chunks]
+        logger.info(f"【得分】hyde 检索结果: "
+                    f"共{len(hyde_embedding_chunks)}条, "
+                    f"分数区间: [{min(scores):.4f}, {max(scores):.4f}], "
+                    f"Top3: {sorted(scores, reverse=True)[:3]}")
+    else:
+        logger.info(f"【得分】hyde 检索结果: 共0条")
     return hyde_embedding_chunks
 
 

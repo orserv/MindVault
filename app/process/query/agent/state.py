@@ -8,6 +8,8 @@ class QueryGraphState(TypedDict):
     QueryGraphState 定义了整个查询流程中流转的数据结构。
     TypedDict 让我们在代码中能有自动补全和类型检查。
     使用字典式访问（如 state["session_id"]、state.get("answer")）。
+
+    【新增】graph_chunks: Neo4j 图检索返回的结构化关系数据
     """
     session_id: str  # 会话唯一标识
     original_query: str  # 用户原始问题
@@ -15,6 +17,7 @@ class QueryGraphState(TypedDict):
     # 检索过程中的中间数据
     embedding_chunks: list  # 普通向量检索回来的切片
     hyde_embedding_chunks: list  # HyDE 检索回来的切片
+    graph_chunks: list  # 【新增】Neo4j 图检索回来的结构化关系数据
     web_search_docs: list  # 网络搜索回来的文档
 
     # 排序过程中的数据
@@ -41,6 +44,7 @@ query_graph_default_state: QueryGraphState = {
     "original_query": "",
     "embedding_chunks": [],
     "hyde_embedding_chunks": [],
+    "graph_chunks": [],  # 【新增】图检索结果默认空
     "web_search_docs": [],
     "rrf_chunks": [],
     "reranked_docs": [],

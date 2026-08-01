@@ -83,6 +83,17 @@ def deal_milvus_list(milvus_list):
             "source": "milvus",  # 直接查询 或者假设性查询  milvus 网络检索 web
             "url": ""
         })
+
+    # {增加}
+    if embedding_chunks:
+        scores = [s['score'] for s in embedding_chunks]
+        logger.info(f"【得分】embedding 检索结果: "
+                    f"共{len(embedding_chunks)}条, "
+                    f"分数区间: [{min(scores):.4f}, {max(scores):.4f}], "
+                    f"Top3: {sorted(scores, reverse=True)[:3]}")
+    else:
+        logger.info(f"【得分】embedding 检索结果: 共0条")
+
     return embedding_chunks
 
 

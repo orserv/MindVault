@@ -9,7 +9,8 @@ from app.process.import_.agent.nodes.node_document_split import node_document_sp
 from app.process.import_.agent.nodes.node_item_name_recognition import node_item_name_recognition
 from app.process.import_.agent.nodes.node_bge_embedding import node_bge_embedding
 from app.process.import_.agent.nodes.node_import_milvus import node_import_milvus
-
+# 【新增】导入知识图谱构建节点
+from app.process.import_.agent.nodes.node_knowledge_graph import node_knowledge_graph
 
 from app.shared.runtime.logger import logger
 
@@ -28,6 +29,8 @@ workflow.add_node(node_document_split)
 workflow.add_node(node_item_name_recognition)
 workflow.add_node(node_bge_embedding)
 workflow.add_node(node_import_milvus)
+# 【新增】添加知识图谱构建节点
+workflow.add_node(node_knowledge_graph)
 
 # 3. 设置起始节点
 # workflow.add_edge(STAR, "node_entry")
@@ -90,7 +93,9 @@ workflow.add_edge("node_md_img", "node_document_split")
 workflow.add_edge("node_document_split", "node_item_name_recognition")
 workflow.add_edge("node_item_name_recognition", "node_bge_embedding")
 workflow.add_edge("node_bge_embedding", "node_import_milvus")
-workflow.add_edge("node_import_milvus", END)
+# 【新增】Milvus 入库后，继续执行知识图谱构建
+workflow.add_edge("node_import_milvus", "node_knowledge_graph")
+workflow.add_edge("node_knowledge_graph", END)
 
 
 # 6.编译图/工作流对象
@@ -102,10 +107,10 @@ if __name__ == "__main__":
     import os
     from app.shared.runtime.logger import logger
 
-    # 全流程测试：验证PDF导入→Milvus入库完整链路
-    logger.info("===== 开始执行知识图谱导入全流程测试 =====")
+    # 全流程测试：验证PDF导入→Milvus入库→知识图谱构建完整链路
+    logger.info("===== 开始执行知识图谱导入全流程测试（含 KG 节点） =====")
 
-    # 1. 构造测试文件路径（复用你项目的doc目录）
+    # 1. 构造测试文件路径（复用项目的doc目录）
     test_pdf_name = os.path.join("doc", "hak180产品安全手册.pdf")
     test_pdf_path = os.path.join(PROJECT_ROOT, test_pdf_name)
 
@@ -128,8 +133,8 @@ if __name__ == "__main__":
         })
         try:
             logger.info(f"测试任务启动，PDF文件路径：{test_pdf_path}")
-            logger.info(f"中间文件输出目录：{test_output_dir}")
-            logger.info("开始执行全流程节点，依次执行：entry→pdf2md→md_img→split→item_name→embedding→milvus")
+            logger.info(
+                "开始执行全流程节点：entry→pdf2md→md_img→split→item_name→embedding→milvus→knowledge_graph")
 
             # 5. 执行LangGraph全流程（流式执行，打印节点执行进度）
             final_state = None
@@ -142,22 +147,27 @@ if __name__ == "__main__":
             # 6. 全流程执行完成，结果预览和核心指标打印
             if final_state:
                 logger.info("-" * 80)
-                logger.info("===== 全流程测试执行成功，核心结果预览 =====")
+                logger.info("===== 全流程测试执行成功（含 KG 节点），核心结果预览 =====")
 
                 # 提取核心结果指标
                 chunks = final_state.get("chunks", [])
                 chunk_count = len(chunks)
-                md_content = final_state.get("md_content", "")[:150]  # MD内容前150字符
+                md_content = final_state.get("md_content", "")[
+                    :150]  # MD内容前150字符
                 item_name = final_state.get("item_name", "未识别")  # 主体名称
-                has_embedding = all("dense_vector" in c and "sparse_vector" in c for c in chunks) if chunks else False
-                has_chunk_id = all("chunk_id" in c for c in chunks) if chunks else False
+                has_embedding = all(
+                    "dense_vector" in c and "sparse_vector" in c for c in chunks) if chunks else False
+                has_chunk_id = all(
+                    "chunk_id" in c for c in chunks) if chunks else False
 
                 # 打印核心指标
                 logger.info(f"📄 PDF转MD内容预览（前150字符）：{md_content}...")
                 logger.info(f"🏷️  识别的主体名称：{item_name}")
                 logger.info(f"📝 文档切分总切片数：{chunk_count}")
                 logger.info(f"🔍 所有切片是否完成向量化：{'是' if has_embedding else '否'}")
-                logger.info(f"🗄️  所有切片是否完成Milvus入库（含chunk_id）：{'是' if has_chunk_id else '否'}")
+                logger.info(
+                    f"🗄️  所有切片是否完成Milvus入库（含chunk_id）：{'是' if has_chunk_id else '否'}")
+                logger.info(f"🕸️  知识图谱构建已完成（实体+关系已写入 Neo4j）")
                 logger.info(f"📂 最终状态包含的核心键：{list(final_state.keys())}")
                 logger.info("-" * 80)
         except Exception as e:

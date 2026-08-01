@@ -128,10 +128,16 @@ def insert_embeddings_content(embeddings_content: list[dict]) -> None:
         collection_name=milvus_gateway.chunks_collection_name,
         data=embeddings_content,
     )
- 
+
     # 记录插入结果
     logger.info(f"插入数据成功! 总条数:{result.get('insert_count', 0)}")
     logger.info(f"插入数据主键回显:{result.get('ids', [])}")
+
+    # 【修复】将 Milvus 自增主键 chunk_id 写回 embeddings_content
+    ids = result.get("ids", [])
+    for idx, chunk_id in enumerate(ids):
+        if idx < len(embeddings_content):
+            embeddings_content[idx]["chunk_id"] = str(chunk_id)
  
 @step_log("index_chunks")
 def index_chunks(state: ImportGraphState) -> ImportGraphState:

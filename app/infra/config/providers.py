@@ -6,6 +6,8 @@ from app.shared.config.mineru_config import mineru_config, MinerUConfig
 from app.shared.config.minio_config import minio_config, MinIOConfig
 from app.shared.config.reranker_config import reranker_config, RerankerConfig
 from app.shared.config.settings_config import settings, AppSettings
+# 【新增】Neo4j 配置
+from app.shared.config.neo4j_config import neo4j_config, Neo4jConfig
 
 from dataclasses import dataclass, field
 
@@ -30,6 +32,8 @@ class InfraConfig:
     reranker_config: RerankerConfig = field(
         default_factory=lambda: reranker_config)
     settings_config: AppSettings = field(default_factory=lambda: settings)
+    # 【新增】Neo4j 配置
+    neo4j_config: Neo4jConfig = field(default_factory=lambda: neo4j_config)
 
 
 """
@@ -50,7 +54,9 @@ if __name__ == "__main__":
     print(infra_config.settings_config.import_app_name)
     print(infra_config.mineru_config.base_url)
     print(infra_config.mineru_config.api_key)
+    # 【新增】测试 Neo4j 配置
+    print(infra_config.neo4j_config.uri)
+    print(infra_config.neo4j_config.database)
 
 
-#  python -m app.shared.runtime.load_prompt
 #  python -m app.infra.config.providers

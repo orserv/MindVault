@@ -32,4 +32,54 @@ CHUNKS_SPLIT_TOP_NUMBER = 10
 
 
 # 向量化批次大小：每批处理 6 条切片，避免显存溢出
-EMBEDDING_BATCH_SIZE=6
+EMBEDDING_BATCH_SIZE = 6
+
+
+# neo4j 配置
+# 关系类型白名单：只允许这些关系类型写入 Neo4j
+ALLOWED_RELATION_TYPES = {
+    "HAS_OPERATION", "HAS_PART", "HAS_STEP", "USES_TOOL",
+    "HAS_WARNING", "NEXT_STEP", "AFFECTS", "REQUIRES",
+    "MENTIONED_IN", "RELATED_TO",
+}
+
+# Neo4j Cypher 语句 —— 创建/合并 Chunk 节点
+CYPHER_MERGE_CHUNK = """
+    MERGE (c:Chunk {id: $chunk_id, item_name: $item_name})
+"""
+
+# Neo4j Cypher 语句 —— 创建/合并 Entity 节点
+CYPHER_MERGE_ENTITY = """
+    MERGE (n:Entity {name: $name, item_name: $item_name})
+    ON CREATE SET
+        n.source_chunk_id = $chunk_id,
+        n.description     = $description,
+        n.types           = CASE
+                                WHEN $label = "" THEN []
+                                ELSE [$label]
+                            END
+    ON MATCH SET
+        n.description = CASE
+                            WHEN $description <> "" THEN $description
+                            ELSE coalesce(n.description, "")
+                        END,
+        n.types       = CASE
+                            WHEN $label = ""                       THEN coalesce(n.types, [])
+                            WHEN $label IN coalesce(n.types, [])   THEN n.types
+                            ELSE coalesce(n.types, []) + $label
+                        END
+"""
+
+# Neo4j Cypher 语句 —— 建立 Entity 到 Chunk 的关联
+CYPHER_LINK_ENTITY_TO_CHUNK = """
+    MATCH (n:Entity {name: $name, item_name: $item_name})
+    MATCH (c:Chunk  {id: $chunk_id, item_name: $item_name})
+    MERGE (n)-[:MENTIONED_IN]->(c)
+"""
+
+# Neo4j Cypher 语句 —— 创建/合并关系（模板，动态填充 rel_type）
+CYPHER_MERGE_RELATION_TEMPLATE = """
+    MATCH (h:Entity {{name: $head, item_name: $item_name}})
+    MATCH (t:Entity {{name: $tail, item_name: $item_name}})
+    MERGE (h)-[:{rel_type}]->(t)
+"""

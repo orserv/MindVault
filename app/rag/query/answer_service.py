@@ -95,6 +95,11 @@ def load_answer_prompt(state: QueryGraphState) -> str:
     # 加载提示词
     answer_out_str = load_prompt("answer_out", question=question,
                                  context=context, item_names=item_names, history=history_text)
+    # {增加}
+    if reranked_docs:
+        scores = [f"{d.get('score', 0):.4f}" for d in reranked_docs]
+        logger.info(f"【得分】答案生成输入: 共{len(reranked_docs)}条文档, "
+                    f"分数: {scores}")
     return answer_out_str
 
 

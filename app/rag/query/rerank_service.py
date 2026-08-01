@@ -140,6 +140,13 @@ def use_reranker_deal_score(question_answer_pair_list, reranker_docs):
         doc["score"] = score
     # 3. 倒序排序
     reranker_docs.sort(key=lambda x: x.get("score", 0), reverse=True)
+    # {增加}
+    if reranker_docs:
+        scores_detail = [
+            f"{d.get('title', '')[:20]}:{d['score']:.4f}" for d in reranker_docs]
+        logger.info(f"【得分】Reranker 模型打分: "
+                    f"共{len(reranker_docs)}条, "
+                    f"分数: {scores_detail}")
 
 
 @step_log("dyn_limit_reranker_docs")
@@ -178,6 +185,11 @@ def dyn_limit_reranker_docs(reranker_docs):
             # 分差
             abs_score = pre_score - next_score
             ratio = abs_score / pre_score
+            # {增加}
+            logger.debug(f"  断崖检测: 位置{pre_index}→{pre_index+1}, "
+                         f"分数{pre_score:.4f}→{next_score:.4f}, "
+                         f"差值{abs_score:.4f}, 比例{ratio:.2%}, "
+                         f"阈值(>{gap_abs} 或 >{gap_ratio:.0%})")
             # 判断断崖
             if abs_score > gap_abs or ratio > gap_ratio:
                 # 出现了断崖!
@@ -186,6 +198,11 @@ def dyn_limit_reranker_docs(reranker_docs):
                 break
     # 获取top k (动态)
     final_reranker_docs = reranker_docs[:topk]
+    # {增加}
+    if final_reranker_docs:
+        logger.info(f"【得分】动态截取: topk={topk}, "
+                    f"原始{len(reranker_docs)}条, 截取后{len(final_reranker_docs)}条, "
+                    f"分数范围: [{final_reranker_docs[-1]['score']:.4f}, {final_reranker_docs[0]['score']:.4f}]")
     # 返回结果
     return final_reranker_docs
 

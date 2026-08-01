@@ -30,12 +30,15 @@ if __name__ == "__main__":
 
     from app.process.query.agent.nodes.node_search_embedding import node_search_embedding
     from app.process.query.agent.nodes.node_search_embedding_hyde import node_search_embedding_hyde
+    from app.process.query.agent.nodes.node_search_graph import node_search_graph
 
     emb_res = node_search_embedding(mock_state)
     hyde_res = node_search_embedding_hyde(mock_state)
+    graph_res = node_search_graph(mock_state)
     mock_state["embedding_chunks"] = emb_res.get("embedding_chunks") or []
     mock_state["hyde_embedding_chunks"] = hyde_res.get(
         "hyde_embedding_chunks") or []
+    mock_state["graph_chunks"] = graph_res.get("graph_chunks") or []
 
     result = node_rrf(mock_state)
     print(result)
