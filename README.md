@@ -1,4 +1,4 @@
-# 企业化 RAG 智能体项目
+# 企业级 RAG 智能体项目
  
 一个面向知识库问答场景的 RAG 智能体项目，当前已经完成兼容式企业化重构，具备以下能力：
  
@@ -83,7 +83,13 @@ python -m venv .venv
 .venv\Scripts\activate
 pip install -e .
 ```
+### 方式二：使用 pip
  
+```bash
+python -m venv .venv
+.venv\Scripts\activate
+pip install -r requirements.txt
+``` 
 ## 环境变量
  
 1. 复制示例文件：

@@ -71,9 +71,12 @@ def search_by_web(state: QueryGraphState) -> QueryGraphState:
     rewritten_query = get_data_and_validate(state)
     # 4. async 使用openai提供mcp方式进行调用(rewritten_query) -> 查询结果
     # MCP SDK 的联网调用是异步实现，因此这里使用 asyncio.run() 做同步与异步之间的桥接。
-    mcp_result = asyncio.run(search_web_documents_async(rewritten_query))
+    # mcp_result = asyncio.run(search_web_documents_async(rewritten_query))
     # 5. 结果解析 todo 注意: 外层都是属性,不是字典
-    text = mcp_result.content[0].text
+    # text = mcp_result.content[0].text
+    text = """
+    {\"pages\":[{\"snippet\":\"123代表的是什么意思? 自然数:123是位于122和124之间的奇数、合数,属于有理数。日常交流:表示到来或问候。寓意进步:逐步递增,象征持续提升。强调基础:体现“一切从1开始”的起始观念。表示理解:在某些语境中意为“知道”或“明白”。统一行动:儿童游戏或口号中用于同步动作(如“1、2、3,嘿!”)。\",\"hostname\":\"百度教育\",\"hostlogo\":\"https://mbs1.bdstatic.com/searchbox/mappconsole/image/20230906/3096e08a-869d-46a7-8d30-5e32adb66fdc.png\",\"title\":\"123代表的是什么意思?\",\"url\":\"https://easylearn.baidu.com/edu-page/tiangong/questiondetail?id=1818048221841140497&fr=search\"}],\"request_id\":\"6ebb31c4-99de-4325-b096-76663ebc4b34\",\"tools\":[],\"status\":0}
+    """
     # {pages:[{snippet,title,url},{},{}]}
     text_dict = json.loads(text)
     web_search_docs = text_dict.get("pages", [])
