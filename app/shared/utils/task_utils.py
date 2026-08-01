@@ -28,28 +28,27 @@ TASK_STATUS_FAILED = "failed"
 # 节点名 -> 中文名映射（用于前端展示）
 # 说明：这里的 key 应与 LangGraph 的 add_node("xxx", ...) 中的节点名一致。
 _NODE_NAME_TO_CN: Dict[str, str] = {
+    # --- Import_ 流程节点（app/process/import_/main_graph.py）---
     "upload_file": "开始上传文件",
     "node_entry": "检查文件",
     "node_pdf_to_md": "PDF转Markdown",
     "node_md_img": "Markdown图片处理",
-    "node_item_name_recognition": "主体名称识别",
     "node_document_split": "文档切分",
+    "node_item_name_recognition": "主体名称识别",
     "node_bge_embedding": "向量生成",
-    "node_import_kg": "导入知识图谱",
     "node_import_milvus": "导入向量库",
     "__end__": "处理完成",
     "END": "处理完成",
-    # --- Query 流程节点（kb/process/query/main_graph.py）---
-    "node_item_name_confirm": "确认问题产品",
-    "node_answer_output": "生成答案",
-    "node_rerank": "重排序",
-    "node_rrf": "倒排融合",
-    "node_web_search_mcp": "网络搜索",
+    # --- Query 流程节点（app/process/query/main_graph.py）---
+    "node_item_name_confirm": "确认问题主体",
     "node_search_embedding": "切片搜索",
     "node_search_embedding_hyde": "切片搜索(假设性文档)",
-    "node_multi_search": "多路搜索",
-    "node_query_kg": "查询知识图谱",
-    "node_join": "多路搜索合并",
+    "node_web_search_mcp": "网络搜索",
+    # "node_join": "多路搜索合并",
+    # "node_multi_search": "多路搜索",
+    "node_rrf": "倒排融合",
+    "node_rerank": "重排序",
+    "node_answer_output": "生成答案",
 }
 
 

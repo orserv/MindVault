@@ -6,7 +6,7 @@ from fastapi.responses import FileResponse, StreamingResponse
 from starlette.middleware.cors import CORSMiddleware
 
 from app.shared.runtime.logger import PROJECT_ROOT, logger
-from app.infra.config.providers import settings
+from app.infra.config.providers import infra_config
 from app.infra.persistence.history_repository import history_repository
 from app.process.query.agent.main_graph import query_app as query_graph_app
 from app.process.query.agent.state import create_query_default_state, QueryGraphState
@@ -24,7 +24,7 @@ from app.api.schemas.query_schema import HealthResponse, QueryRequest, QueryResp
 
 # 定义fastapi对象
 app = FastAPI(
-    title=settings.query_app_name,
+    title=infra_config.settings_config.query_app_name,
     description="描述,进行rag查询的服务对象",
     version="0.2.0"
 )
@@ -32,14 +32,14 @@ app = FastAPI(
 # 跨域处理
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=['*'],
+    allow_origins=list(infra_config.settings_config.cors_origins),
     allow_methods=['*'],
     allow_headers=['*']
 )
 
 
 # 获取查询演示页面
-@app.get("/html")
+@app.get("/")
 def query_html():
     """
     返回查询演示页面。
@@ -208,7 +208,7 @@ def get_history(session_id: str, limit: int = 10):
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host=settings.app_host, port=settings.query_app_port)
-
+    uvicorn.run(app, host=infra_config.settings_config.app_host,
+                port=infra_config.settings_config.query_app_port)
 
 #  python -m app.api.http.query_server
